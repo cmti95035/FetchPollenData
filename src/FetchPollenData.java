@@ -25,11 +25,13 @@ import com.att.m2x.client.M2XStream;
 public class FetchPollenData {
 	private static final String POLLEN_URL = "http://api-m2x.att.com/v2/devices/e0664612675c3f92e43ab42c1c433979/streams/pollen";
 	private static final String USER_AGENT = "Mozilla/5.0";
+	private static final String USER_AGENT_HEADER = "User-Agent";
 	private static final String M2X_HEADER = "H-M2X-KEY";
 	private static final String API_KEY = "b4eab554dc00784b372646e93c7bd0b4";
 	private static M2XClient client = new M2XClient("6192f89a79f3c9f2d006b78eda4df0cc");
 	private static M2XDevice device = client.device("15af65895ed19be59193b8b303b76a8f");
 	private static M2XStream stream = device.stream("pollen");
+	private static final String DOT = ".";
 	
 	public static void main(String[] args) throws Exception{
 		
@@ -37,7 +39,8 @@ public class FetchPollenData {
 		int count = 0;
 		while(count < 1000)
 		{
-			final Double pd = Double.parseDouble(findPollenData());
+			String pdata = findPollenData();
+			final Double pd = pdata.contains(DOT) ? Double.parseDouble(pdata) : 0.0;
 			stream.updateValue(M2XClient.jsonSerialize(new HashMap<String, Object>()
 				    {{
 				        put("value", pd);
@@ -61,7 +64,7 @@ public class FetchPollenData {
 			HttpGet request = new HttpGet(POLLEN_URL);
 	 
 			// add request header
-			request.addHeader("User-Agent", USER_AGENT);
+			request.addHeader(USER_AGENT_HEADER, USER_AGENT);
 			request.addHeader(M2X_HEADER, API_KEY);
 	 
 			HttpResponse response = client.execute(request);
